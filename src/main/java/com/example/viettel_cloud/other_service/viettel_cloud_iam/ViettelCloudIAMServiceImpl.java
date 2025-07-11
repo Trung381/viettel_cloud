@@ -1,7 +1,8 @@
-package com.example.viettel_cloud.other_service;
+package com.example.viettel_cloud.other_service.viettel_cloud_iam;
 
 import com.example.viettel_cloud.configuration.APIConnectionConfig;
-import com.example.viettel_cloud.dto.response.SubscriptionRecord;
+import com.example.viettel_cloud.dto.request.ExchangeTokenReq;
+import com.example.viettel_cloud.dto.response.ExchangeTokenRes;
 import com.example.viettel_cloud.util.RetrofitCommunication;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,42 +10,27 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.ResponseBody;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class ViettelCloudServiceImpl implements ViettelCloudService {
-    private ViettelCloudCommunicate communicate;
+public class ViettelCloudIAMServiceImpl implements ViettelCloudIAMService {
+    private ViettelCloudIAMCommunicate communicate;
     private final APIConnectionConfig apiConnectionConfig;
 
     @PostConstruct
     void init() {
-        communicate = RetrofitCommunication.buildSetting(ViettelCloudCommunicate.class, apiConnectionConfig.getViettelCloud().getApiUrl(), apiConnectionConfig.getViettelCloud());
+        communicate = RetrofitCommunication.buildSetting(ViettelCloudIAMCommunicate.class, apiConnectionConfig.getViettelCloudIAM().getApiUrl(), apiConnectionConfig.getViettelCloudIAM());
     }
 
     @Override
-    public List<SubscriptionRecord> getSubscriptions(String apiKey, String customerId, List<String> subscriptionFilters, String planId, String status) {
-        Call<List<SubscriptionRecord>> call = communicate.getSubscriptions(apiKey, customerId, subscriptionFilters, planId, status);
-        return handleResponse(call);
-    }
-
-    @Override
-    public SubscriptionRecord getSubscriptionDetail(String apiKey, String subscriptionId) {
-        Call<SubscriptionRecord> call = communicate.getSubscriptionDetail(apiKey, subscriptionId);
-        return handleResponse(call);
-    }
-
-    @Override
-    public SubscriptionRecord updateSubscription(String apiKey, String subscriptionId, Map<String, Object> metadata) {
-        Call<SubscriptionRecord> call = communicate.updateSubscription(apiKey, subscriptionId, metadata);
+    public ExchangeTokenRes exchangeToken(ExchangeTokenReq request) {
+        Call<ExchangeTokenRes> call = communicate.exchangeToken(request);
         return handleResponse(call);
     }
 

@@ -30,10 +30,11 @@ public class ViettelCloudServiceImpl implements ViettelCloudService {
         communicate = RetrofitCommunication.buildSetting(ViettelCloudCommunicate.class, apiConnectionConfig.getViettelCloud().getApiUrl(), apiConnectionConfig.getViettelCloud());
     }
 
-//    @Override
-//    public List<SubscriptionRecord> getSubscriptions(String apiKey, String customerId, List<String> subscriptionFilters, String planId, String status) {
-//        return List.of();
-//    }
+    @Override
+    public List<SubscriptionRecord> getSubscriptions(String apiKey, String customerId, List<String> subscriptionFilters, String planId, String status) {
+        Call<List<SubscriptionRecord>> call = communicate.getSubscriptions(apiKey, customerId, subscriptionFilters, planId, status);
+        return handleResponse(call);
+    }
 
     @Override
     public SubscriptionRecord getSubscriptionDetail(String apiKey, String subscriptionId) {

@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Map;
 
 public interface ViettelCloudCommunicate {
-//    @GET("/api/subscriptions/get/")
-//    Call<List<SubscriptionRecord>> getSubscriptions(
-//            @Header("X-API-KEY") String apiKey,
-//            @Query("customer_id") String customerId,
-//            @Query("subscription_filters") List<String> subscriptionFilters,
-//            @Query("plan_id") String planId,
-//            @Query("status") String status
-//    );
+    @GET("/api/subscriptions/get/")
+    Call<List<SubscriptionRecord>> getSubscriptions(
+            @Header("X-API-KEY") String apiKey,
+            @Query("customer_id") String customerId,
+            @Query("subscription_filters") List<String> subscriptionFilters,
+            @Query("plan_id") String planId,
+            @Query("status") String status
+    );
 
     @GET("/api/subscriptions/{subscription_id}/get/")
     Call<SubscriptionRecord> getSubscriptionDetail(

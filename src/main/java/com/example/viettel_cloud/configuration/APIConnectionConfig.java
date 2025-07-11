@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class APIConnectionConfig {
 
     private ViettelCloud viettelCloud;
+    private ViettelCloudIAM viettelCloudIAM;
 
     @Getter
     @Setter
@@ -26,5 +27,10 @@ public class APIConnectionConfig {
     @Setter
     public static class ViettelCloud extends Connection {
         private String apiKey;
+    }
+
+    @Getter
+    @Setter
+    public static class ViettelCloudIAM extends Connection {
     }
 }

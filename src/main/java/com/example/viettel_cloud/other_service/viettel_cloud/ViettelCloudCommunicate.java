@@ -1,4 +1,4 @@
-package com.example.viettel_cloud.other_service;
+package com.example.viettel_cloud.other_service.viettel_cloud;
 
 import com.example.viettel_cloud.dto.response.SubscriptionRecord;
 import retrofit2.Call;

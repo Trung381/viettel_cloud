@@ -1,6 +1,8 @@
 package com.example.viettel_cloud.Controller;
 
 import com.example.viettel_cloud.Service.SubscriptionService;
+import com.example.viettel_cloud.dto.request.VerifyCodeReq;
+import com.example.viettel_cloud.dto.response.BaseResponse;
 import com.example.viettel_cloud.dto.response.ViettelCloudCallback;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,11 @@ public class SubscriptionController {
 //        return ResponseEntity.ok(service.ex(request));
         //TODO
         return ResponseEntity.ok(null);
+    }
+
+    @PostMapping("v1/verify-code")
+    public ResponseEntity<BaseResponse<?>> verifyCode(VerifyCodeReq request) {
+        return ResponseEntity.ok(new BaseResponse<>(subscriptionService.verifyCode(request)));
     }
 
 }

@@ -1,4 +1,4 @@
-package com.example.viettel_cloud.other_service;
+package com.example.viettel_cloud.other_service.viettel_cloud;
 
 import com.example.viettel_cloud.configuration.APIConnectionConfig;
 import com.example.viettel_cloud.dto.response.SubscriptionRecord;
@@ -42,20 +42,20 @@ public class ViettelCloudServiceImpl implements ViettelCloudService {
     }
 
     @Override
-    public List<SubscriptionRecord> getSubscriptions(String apiKey, String customerId, List<String> subscriptionFilters, String planId, String status) {
-        Call<List<SubscriptionRecord>> call = communicate.getSubscriptions(apiKey, customerId, subscriptionFilters, planId, status);
+    public List<SubscriptionRecord> getSubscriptions(String customerId, List<String> subscriptionFilters, String planId, String status) {
+        Call<List<SubscriptionRecord>> call = communicate.getSubscriptions(apiConnectionConfig.getViettelCloud().getApiKey(), customerId, subscriptionFilters, planId, status);
         return handleResponse(call);
     }
 
     @Override
-    public SubscriptionRecord getSubscriptionDetail(String apiKey, String subscriptionId) {
-        Call<SubscriptionRecord> call = communicate.getSubscriptionDetail(apiKey, subscriptionId);
+    public SubscriptionRecord getSubscriptionDetail(String subscriptionId) {
+        Call<SubscriptionRecord> call = communicate.getSubscriptionDetail(apiConnectionConfig.getViettelCloud().getApiKey(), subscriptionId);
         return handleResponse(call);
     }
 
     @Override
-    public SubscriptionRecord updateSubscription(String apiKey, String subscriptionId, Map<String, Object> metadata) {
-        Call<SubscriptionRecord> call = communicate.updateSubscription(apiKey, subscriptionId, metadata);
+    public SubscriptionRecord updateSubscription(String subscriptionId, Map<String, Object> metadata) {
+        Call<SubscriptionRecord> call = communicate.updateSubscription(apiConnectionConfig.getViettelCloud().getApiKey(), subscriptionId, metadata);
         return handleResponse(call);
     }
 

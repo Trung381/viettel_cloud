@@ -1,13 +1,21 @@
 package com.example.viettel_cloud.Service;
 
+import com.example.viettel_cloud.dto.request.ExchangeTokenReq;
+import com.example.viettel_cloud.dto.request.VerifyCodeReq;
+import com.example.viettel_cloud.dto.response.ExchangeTokenRes;
 import com.example.viettel_cloud.dto.response.ViettelCloudCallback;
 import com.example.viettel_cloud.exception.WebhookVerificationException;
+import com.example.viettel_cloud.other_service.viettel_cloud_iam.ViettelCloudIAMService;
+import com.example.viettel_cloud.security.JwtTokenProvider;
 import com.example.viettel_cloud.util.HmacSHA256;
 import com.example.viettel_cloud.util.Util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -19,15 +27,21 @@ import java.time.Instant;
 import java.util.Base64;
 
 @Service
+@RequiredArgsConstructor
+//@SessionAttributes("state")
 public class SubscriptionServiceImpl implements SubscriptionService {
 
-    private final String webhookSecret;
+    @Value("${viettel.webhook.secret}")
+    private String webhookSecret;
     final long FIVE_MINUTES_IN_MILLISECONDS = 5 * 60 * 1000;
+    private final ViettelCloudIAMService iamService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public SubscriptionServiceImpl(@Value("${viettel.webhook.secret}") String webhookSecret) {
-        this.webhookSecret = webhookSecret;
-    }
+    @Value("${viettel-cloud.iam.client-id}")
+    private String clientId;
 
+    @Value("${viettel-cloud.iam.redirect-url}")
+    private String redirectUrl;
 
     @Override
     public void processSubscription(String whId, String whTimestamp, String whSignature, String rawBody) {
@@ -57,7 +71,21 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
     }
 
-//    private void verifyTimestamp(String webhookTimestamp) {
+    @Override
+    public Object verifyCode(VerifyCodeReq request) {
+        // Giả sử xác thực code thành công
+        // => Gọi exchange token
+        ExchangeTokenReq exchangeTokenReq = new ExchangeTokenReq();
+        exchangeTokenReq.setCode(request.getCode());
+        exchangeTokenReq.setCodeVerifier("");
+        exchangeTokenReq.setClientId(clientId);
+        exchangeTokenReq.setRedirectUri(redirectUrl);
+
+        ExchangeTokenRes exchangeTokenRes = iamService.exchangeToken(exchangeTokenReq);
+        return jwtTokenProvider.getUserIdentity(exchangeTokenRes.getAccessToken());
+    }
+
+    //    private void verifyTimestamp(String webhookTimestamp) {
 //        long requestTime;
 //        try {
 //            requestTime = Long.parseLong(webhookTimestamp);

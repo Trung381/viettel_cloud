@@ -9,14 +9,19 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.ResponseBody;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+
+import static com.example.viettel_cloud.util.Util.*;
 
 @Log4j2
 @Service
@@ -24,6 +29,12 @@ import java.util.Map;
 public class ViettelCloudServiceImpl implements ViettelCloudService {
     private ViettelCloudCommunicate communicate;
     private final APIConnectionConfig apiConnectionConfig;
+    @Value("${client-id}")
+    private String clientId;
+    @Value("${redirect-uri}")
+    private String redirectUri;
+    @Value("${base-url}")
+    private String baseUrl;
 
     @PostConstruct
     void init() {
@@ -49,8 +60,25 @@ public class ViettelCloudServiceImpl implements ViettelCloudService {
     }
 
     @Override
-    public String initLoginLink(String baseUrl, String clientId, String redirectUri) {
-        return "";
+    public String initLoginLink() {
+        String state = genState();
+        String codeVerifier = generateCodeVerifier();
+        String codeChallenge = genCodeChallenge(codeVerifier);
+
+        //TODO: Lưu codeVerifier để sử dụng sau khi nhận code (gửi lại để lấy access_token)
+//        System.out.println("Code Verifier: " + codeVerifier);
+//        System.out.println("Code Challenge: " + codeChallenge);
+//        System.out.println("State: " + state);
+
+        return "base-url"
+                + "?protocol=oauth2"
+                + "&response_type=code"
+                + "&client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8)
+                + "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
+                + "&scope=openid"
+                + "&state=" + URLEncoder.encode(state, StandardCharsets.UTF_8)
+                + "&code_challenge_method=S256"
+                + "&code_challenge=" + URLEncoder.encode(codeChallenge, StandardCharsets.UTF_8);
     }
 
     private <T> T handleResponse(Call<T> call) {

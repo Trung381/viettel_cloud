@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -30,6 +31,13 @@ public class Util {
         }
     }
 
+    public static String randomString(int count, String characters) {
+        return RandomStringUtils.random(count, characters);
+    }
+
+    public static String genState() {
+        return randomString(STATE_LENGTH, STATE_CHARACTERS);
+    }
 
     /**
      * Chuỗi chứa các ký tự A-Z, a-z, 0-9, và các ký tự dấu câu -._~
@@ -37,25 +45,27 @@ public class Util {
      * @return Một chuỗi code_verifier được tạo ngẫu nhiên.
      */
     public static String generateCodeVerifier() {
-        String codeVerifierChar = CODE_VERIFIER_CHARACTERS;
-
         SecureRandom random = new SecureRandom();
 
         // random.nextInt(86) sẽ tạo ra một số từ 0 đến 85
         // Cộng với 43 sẽ cho kết quả trong khoảng [43, 128]
         int length = random.nextInt(86) + 43;
+        System.out.println("Generated code verifier length: " + length);
 
-        StringBuilder codeVerifier = new StringBuilder(length);
-
-        for (int i = 0; i < length; i++) {
-            int randomIndex = random.nextInt(codeVerifierChar.length());
-            codeVerifier.append(codeVerifierChar.charAt(randomIndex));
-        }
-
-        return codeVerifier.toString();
+        return randomString(length, CODE_VERIFIER_CHARACTERS);
     }
 
-    public static String hashSHA256(String input) {
+    /**
+     * <p>code challenge = Base64-URL-encoding( Base64-encoding( SHA256( code verifier)))</p>
+     * <p>Thứ tự thực hiện như sau:</p>
+     * <ol>
+     * <li>{@code generateCodeVerifier()} &rarr; tạo ra chuỗi ngẫu nhiên.</li>
+     * <li>{@code genCodeChallenge(String input)} &rarr; mã hóa Base64-URL kết quả băm.</li>
+     * </ol>
+     * <b>Lưu ý:</b> Kết quả của hàm trước là đầu vào cho hàm sau.
+     * @return Chuỗi {@code code_challenge} cuối cùng để sử dụng trong API đăng nhập.
+     */
+    public static String genCodeChallenge(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
@@ -70,49 +80,11 @@ public class Util {
                 hexString.append(hex);
             }
 
-            return hexString.toString();
+            return Base64.getUrlEncoder().withoutPadding().encodeToString(hexString.toString().getBytes());
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static String base64Encode(String input) {
-        return Base64.getEncoder().encodeToString(input.getBytes());
-    }
-
-    public static String base64UrlEncode(String input) {
-        String base64 = base64Encode(input);
-
-        return base64.replace("+", "-")
-                .replace("/", "_")
-                .replaceAll("=+$", ""); // bỏ dấu '=' ở cuối
-    }
-
-    /**
-     * <p>code challenge = Base64-URL-encoding( Base64-encoding( SHA256( code verifier)))</p>
-     * <p>Thứ tự thực hiện như sau:</p>
-     * <ol>
-     * <li>{@code generateCodeVerifier()} &rarr; tạo ra chuỗi ngẫu nhiên.</li>
-     * <li>{@code hashSHA256(String input)} &rarr; băm chuỗi verifier.</li>
-     * <li>{@code genCodeChallenge(String input)} &rarr; mã hóa Base64-URL kết quả băm.</li>
-     * </ol>
-     * <b>Lưu ý:</b> Kết quả của hàm trước là đầu vào cho hàm sau.
-     * @return Chuỗi {@code code_challenge} cuối cùng để sử dụng trong API đăng nhập.
-     */
-    public static String genCodeChallenge(String input) {
-        String codeVerifierChar = generateCodeVerifier();
-        String codeVerifierCharSHA256 = hashSHA256(codeVerifierChar);
-        return base64UrlEncode(codeVerifierCharSHA256);
-    }
-
-    public static String genState() {
-        StringBuilder state = new StringBuilder(STATE_LENGTH);
-        SecureRandom random = new SecureRandom();
-        for (int i = 0; i < STATE_LENGTH; i++) {
-            int index = random.nextInt(STATE_CHARACTERS.length());
-            state.append(STATE_CHARACTERS.charAt(index));
-        }
-        return state.toString();
-    }
 }

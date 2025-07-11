@@ -12,5 +12,6 @@ public interface ViettelCloudService {
 
     SubscriptionRecord updateSubscription(String apiKey, String subscriptionId, Map<String, Object> metadata);
 
-    String initLoginLink(String baseUrl, String clientId, String redirectUri);
+//    String initLoginLink(String baseUrl, String clientId, String redirectUri);
+    String initLoginLink();
 }

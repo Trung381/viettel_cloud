@@ -2,6 +2,8 @@ package com.example.viettel_cloud.Service;
 
 import com.example.viettel_cloud.dto.response.ViettelCloudCallback;
 import com.example.viettel_cloud.exception.WebhookVerificationException;
+import com.example.viettel_cloud.util.HmacSHA256;
+import com.example.viettel_cloud.util.Util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,27 +22,33 @@ import java.util.Base64;
 public class SubscriptionServiceImpl implements SubscriptionService {
 
     private final String webhookSecret;
-    private final ObjectMapper objectMapper;
-    final long FIVE_MINUTES_IN_SECONDS = 5 * 60;
+    final long FIVE_MINUTES_IN_MILLISECONDS = 5 * 60 * 1000;
 
     public SubscriptionServiceImpl(@Value("${viettel.webhook.secret}") String webhookSecret) {
         this.webhookSecret = webhookSecret;
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.registerModule(new JavaTimeModule());
     }
 
 
     @Override
-    public void processSubscription(String webhookId, String webhookTimestamp, String providedSignature, String rawBody) {
-        verifyTimestamp(webhookTimestamp);
-
-        verifySignature(webhookId, webhookTimestamp, rawBody, providedSignature);
+    public void processSubscription(String whId, String whTimestamp, String whSignature, String rawBody) {
+//        verifyTimestamp(webhookTimestamp);
+//
+//        verifySignature(webhookId, webhookTimestamp, rawBody, providedSignature);
 
         try {
-            ViettelCloudCallback event = objectMapper.readValue(rawBody, ViettelCloudCallback.class);
+            if (!HmacSHA256.verifyMessage(webhookSecret, whTimestamp, whId, whSignature, rawBody, FIVE_MINUTES_IN_MILLISECONDS)) {
+                //todo: ignore request
+                return;
+            }
 
-            // TODO:
-            System.out.println("Event Type: " + event.getEventType());
+            ViettelCloudCallback request = Util.stringToObject(ViettelCloudCallback.class, rawBody);
+            if (request == null) {
+                //todo: xử lý khi parse thất bại
+                return;
+            }
+
+            // TODO: Logic xử lý khi nhận được callback
+            System.out.println("Event Type: " + request.getEventType());
             // ...
 
         } catch (Exception e) {
@@ -49,51 +57,51 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
     }
 
-    private void verifyTimestamp(String webhookTimestamp) {
-        long requestTime;
-        try {
-            requestTime = Long.parseLong(webhookTimestamp);
-        } catch (NumberFormatException e) {
-            throw new WebhookVerificationException("Invalid timestamp format.");
-        }
+//    private void verifyTimestamp(String webhookTimestamp) {
+//        long requestTime;
+//        try {
+//            requestTime = Long.parseLong(webhookTimestamp);
+//        } catch (NumberFormatException e) {
+//            throw new WebhookVerificationException("Invalid timestamp format.");
+//        }
+//
+//        long currentTime = Instant.now().getEpochSecond();
+//
+//        if (currentTime - requestTime > FIVE_MINUTES_IN_SECONDS) {
+//            throw new WebhookVerificationException("Webhook request is too old.");
+//        }
+//    }
 
-        long currentTime = Instant.now().getEpochSecond();
-
-        if (currentTime - requestTime > FIVE_MINUTES_IN_SECONDS) {
-            throw new WebhookVerificationException("Webhook request is too old.");
-        }
-    }
-
-    private void verifySignature(String webhookId, String webhookTimestamp, String rawBody, String providedSignature) {
-        try {
-            String signingString = webhookId + "." + webhookTimestamp + "." + rawBody;
-
-            String calculatedSignature = calculateSignature(signingString);
-
-            if (!MessageDigest.isEqual(calculatedSignature.getBytes(StandardCharsets.UTF_8), providedSignature.getBytes(StandardCharsets.UTF_8))) {
-                throw new WebhookVerificationException("Webhook signature does not match.");
-            }
-
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new RuntimeException("Could not validate signature due to internal server error.", e);
-        }
-    }
-
-    private String calculateSignature(String data) throws NoSuchAlgorithmException, InvalidKeyException {
-        // **Quan trọng**: Bỏ tiền tố "whsec_" khỏi secret
-        String keyWithoutPrefix = webhookSecret.replace("whsec_", "");
-
-        byte[] secretKeyBytes = Base64.getDecoder().decode(keyWithoutPrefix);
-
-        // Tạo HMAC-SHA256
-        Mac sha256Hmac = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKeyBytes, "HmacSHA256");
-        sha256Hmac.init(secretKeySpec);
-
-        // Ký dữ liệu
-        byte[] signatureBytes = sha256Hmac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-
-        // **Quan trọng**: Mã hóa kết quả bằng Base64 và thêm tiền tố "v1,"
-        return "v1," + Base64.getEncoder().encodeToString(signatureBytes);
-    }
+//    private void verifySignature(String webhookId, String webhookTimestamp, String rawBody, String providedSignature) {
+//        try {
+//            String signingString = webhookId + "." + webhookTimestamp + "." + rawBody;
+//
+//            String calculatedSignature = calculateSignature(signingString);
+//
+//            if (!MessageDigest.isEqual(calculatedSignature.getBytes(StandardCharsets.UTF_8), providedSignature.getBytes(StandardCharsets.UTF_8))) {
+//                throw new WebhookVerificationException("Webhook signature does not match.");
+//            }
+//
+//        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+//            throw new RuntimeException("Could not validate signature due to internal server error.", e);
+//        }
+//    }
+//
+//    private String calculateSignature(String data) throws NoSuchAlgorithmException, InvalidKeyException {
+//        // **Quan trọng**: Bỏ tiền tố "whsec_" khỏi secret
+//        String keyWithoutPrefix = webhookSecret.replace("whsec_", "");
+//
+//        byte[] secretKeyBytes = Base64.getDecoder().decode(keyWithoutPrefix);
+//
+//        // Tạo HMAC-SHA256
+//        Mac sha256Hmac = Mac.getInstance("HmacSHA256");
+//        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKeyBytes, "HmacSHA256");
+//        sha256Hmac.init(secretKeySpec);
+//
+//        // Ký dữ liệu
+//        byte[] signatureBytes = sha256Hmac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+//
+//        // **Quan trọng**: Mã hóa kết quả bằng Base64 và thêm tiền tố "v1,"
+//        return "v1," + Base64.getEncoder().encodeToString(signatureBytes);
+//    }
 }

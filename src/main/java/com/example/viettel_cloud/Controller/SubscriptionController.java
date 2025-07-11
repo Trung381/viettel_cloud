@@ -16,8 +16,8 @@ public class SubscriptionController {
     @PostMapping("v1/subscription/wh")
     public ResponseEntity<String> ex(@RequestHeader("Webhook-Id") String webhookId,
                                      @RequestHeader("Webhook-Timestamp") String webhookTimestamp,
-                                     @RequestHeader("Webhook-Signature") String providedSignature,
-                                     @RequestBody String rawBody) {
+                                     @RequestHeader("Webhook-Signature") String whSignature,
+                                     @RequestBody String body) {
 //        return ResponseEntity.ok(service.ex(request));
         //TODO
         return ResponseEntity.ok(null);

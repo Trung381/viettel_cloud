@@ -48,6 +48,11 @@ public class ViettelCloudServiceImpl implements ViettelCloudService {
         return handleResponse(call);
     }
 
+    @Override
+    public String initLoginLink(String baseUrl, String clientId, String redirectUri) {
+        return "";
+    }
+
     private <T> T handleResponse(Call<T> call) {
         try {
             Response<T> response = call.execute();
@@ -72,4 +77,6 @@ public class ViettelCloudServiceImpl implements ViettelCloudService {
             throw new RuntimeException(e);
         }
     }
+
+
 }

@@ -3,7 +3,6 @@ package com.example.viettel_cloud.Controller;
 import com.example.viettel_cloud.Service.SubscriptionService;
 import com.example.viettel_cloud.dto.request.VerifyCodeReq;
 import com.example.viettel_cloud.dto.response.BaseResponse;
-import com.example.viettel_cloud.dto.response.ViettelCloudCallback;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

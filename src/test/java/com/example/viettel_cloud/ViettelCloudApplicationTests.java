@@ -1,9 +1,8 @@
 package com.example.viettel_cloud;
 
-import com.example.viettel_cloud.other_service.ViettelCloudService;
+import com.example.viettel_cloud.other_service.viettel_cloud_iam.ViettelCloudIAMService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static com.example.viettel_cloud.util.Util.*;
@@ -11,14 +10,7 @@ import static com.example.viettel_cloud.util.Util.*;
 @SpringBootTest
 class ViettelCloudApplicationTests {
     @Autowired
-    private ViettelCloudService viettelCloudService;
-    
-    @Value("${client-id}")
-    private String clientId;
-    @Value("${redirect-uri}")
-    private String redirectUri;
-    @Value("${base-url}")
-    private String baseUrl;
+    private ViettelCloudIAMService viettelCloudIAMService;
 
     @Test
     void contextLoads() {
@@ -40,7 +32,7 @@ class ViettelCloudApplicationTests {
 
     @Test
     void testInitLoginLink(){
-        System.out.println(viettelCloudService.initLoginLink());
+        System.out.println(viettelCloudIAMService.genLoginLink());
     }
 
     @Test

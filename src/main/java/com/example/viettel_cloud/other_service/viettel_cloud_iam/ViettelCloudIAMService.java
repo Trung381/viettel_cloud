@@ -5,4 +5,5 @@ import com.example.viettel_cloud.dto.response.ExchangeTokenRes;
 
 public interface ViettelCloudIAMService {
     ExchangeTokenRes exchangeToken(ExchangeTokenReq request);
+    String genLoginLink();
 }

@@ -1,7 +1,7 @@
 package com.example.viettel_cloud.other_service.viettel_cloud_iam;
 
 import com.example.viettel_cloud.configuration.APIConnectionConfig;
-import com.example.viettel_cloud.dto.request.ExchangeTokenReq;
+import com.example.viettel_cloud.dto.request.auth.ExchangeTokenReq;
 import com.example.viettel_cloud.dto.response.ExchangeTokenRes;
 import com.example.viettel_cloud.util.RetrofitCommunication;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -10,16 +10,11 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import okhttp3.ResponseBody;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
-import static com.example.viettel_cloud.util.Util.*;
 
 @Log4j2
 @Service
@@ -27,15 +22,6 @@ import static com.example.viettel_cloud.util.Util.*;
 public class ViettelCloudIAMServiceImpl implements ViettelCloudIAMService {
     private ViettelCloudIAMCommunicate communicate;
     private final APIConnectionConfig apiConnectionConfig;
-
-    @Value("${viettel-cloud.iam.base-url}")
-    private String baseUrl;
-
-    @Value("${viettel-cloud.iam.client-id}")
-    private String clientId;
-
-    @Value("${viettel-cloud.iam.redirect-url}")
-    private String redirectUri;
 
     @PostConstruct
     void init() {
@@ -71,27 +57,5 @@ public class ViettelCloudIAMServiceImpl implements ViettelCloudIAMService {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public String genLoginLink() {
-        String state = genState();
-        String codeVerifier = generateCodeVerifier();
-        String codeChallenge = genCodeChallenge(codeVerifier);
-
-        //TODO: Lưu codeVerifier để sử dụng sau khi nhận code (gửi lại để lấy access_token)
-//        System.out.println("Code Verifier: " + codeVerifier);
-//        System.out.println("Code Challenge: " + codeChallenge);
-//        System.out.println("State: " + state);
-
-        return baseUrl
-                + "?protocol=oauth2"
-                + "&response_type=code"
-                + "&client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8)
-                + "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
-                + "&scope=openid"
-                + "&state=" + URLEncoder.encode(state, StandardCharsets.UTF_8)
-                + "&code_challenge_method=S256"
-                + "&code_challenge=" + URLEncoder.encode(codeChallenge, StandardCharsets.UTF_8);
     }
 }

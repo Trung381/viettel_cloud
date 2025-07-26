@@ -3,20 +3,28 @@ package com.example.viettel_cloud.util;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Base64;
 
 public final class HmacSHA256 {
 
     private static final String HMAC_SHA256_ALGORITHM = "HmacSHA256";
 
-    public static String encrypt(String message, String secretKey) {
+    public static byte[] encrypt(String message, String secretKey) {
         try {
             SecretKeySpec signingKey = new SecretKeySpec(secretKey.getBytes(), HMAC_SHA256_ALGORITHM);
             Mac mac = Mac.getInstance(HMAC_SHA256_ALGORITHM);
             mac.init(signingKey);
-            byte[] rawHmac = mac.doFinal(message.getBytes());
-            return new String(Base64.getEncoder().encode(rawHmac));
+            return mac.doFinal(message.getBytes());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate HMAC", e);
+        }
+    }
 
+    public static byte[] encrypt(String message) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance(HMAC_SHA256_ALGORITHM);
+            return digest.digest(message.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate HMAC", e);
         }

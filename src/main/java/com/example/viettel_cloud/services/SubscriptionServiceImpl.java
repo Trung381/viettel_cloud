@@ -1,6 +1,6 @@
-package com.example.viettel_cloud.Service;
+package com.example.viettel_cloud.services;
 
-import com.example.viettel_cloud.dto.request.ExchangeTokenReq;
+import com.example.viettel_cloud.dto.request.auth.ExchangeTokenReq;
 import com.example.viettel_cloud.dto.request.VerifyCodeReq;
 import com.example.viettel_cloud.dto.response.ExchangeTokenRes;
 import com.example.viettel_cloud.dto.response.ViettelCloudCallback;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-//@SessionAttributes("state")
 public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Value("${viettel.webhook.secret}")
@@ -57,19 +56,5 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             // Nếu parse lỗi, ném ra exception
             throw new WebhookVerificationException("Invalid JSON body format: " + e.getMessage());
         }
-    }
-
-    @Override
-    public Object verifyCode(VerifyCodeReq request) {
-        // Giả sử xác thực code thành công
-        // => Gọi exchange token
-        ExchangeTokenReq exchangeTokenReq = new ExchangeTokenReq();
-        exchangeTokenReq.setCode(request.getCode());
-        exchangeTokenReq.setCodeVerifier("");
-        exchangeTokenReq.setClientId(clientId);
-        exchangeTokenReq.setRedirectUri(redirectUrl);
-
-        ExchangeTokenRes exchangeTokenRes = iamService.exchangeToken(exchangeTokenReq);
-        return jwtTokenProvider.getUserIdentity(exchangeTokenRes.getAccessToken());
     }
 }

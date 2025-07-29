@@ -1,6 +1,6 @@
 package com.example.viettel_cloud.other_service.viettel_cloud;
 
-import com.example.viettel_cloud.dto.response.SubscriptionRecord;
+import com.example.viettel_cloud.dto.request.viettel_cloud.SubscriptionRecord;
 
 import java.util.List;
 import java.util.Map;

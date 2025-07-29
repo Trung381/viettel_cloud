@@ -1,7 +1,7 @@
 package com.example.viettel_cloud.other_service.viettel_cloud;
 
 import com.example.viettel_cloud.configuration.APIConnectionConfig;
-import com.example.viettel_cloud.dto.response.SubscriptionRecord;
+import com.example.viettel_cloud.dto.request.viettel_cloud.SubscriptionRecord;
 import com.example.viettel_cloud.util.RetrofitCommunication;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

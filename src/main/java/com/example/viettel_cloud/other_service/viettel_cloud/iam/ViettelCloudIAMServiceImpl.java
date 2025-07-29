@@ -1,8 +1,8 @@
-package com.example.viettel_cloud.other_service.viettel_cloud_iam;
+package com.example.viettel_cloud.other_service.viettel_cloud.iam;
 
 import com.example.viettel_cloud.configuration.APIConnectionConfig;
 import com.example.viettel_cloud.dto.request.auth.ExchangeTokenReq;
-import com.example.viettel_cloud.dto.response.ExchangeTokenRes;
+import com.example.viettel_cloud.dto.response.auth.ExchangeTokenRes;
 import com.example.viettel_cloud.util.RetrofitCommunication;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

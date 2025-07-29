@@ -9,6 +9,7 @@ import java.util.Base64;
 public final class HmacSHA256 {
 
     private static final String HMAC_SHA256_ALGORITHM = "HmacSHA256";
+    private static final long EXPIRES_IN_MS = 300000; // 5 phút = 300000 ms
 
     public static byte[] encrypt(String message, String secretKey) {
         try {
@@ -30,17 +31,16 @@ public final class HmacSHA256 {
         }
     }
 
-    public static boolean verifyMessage(String secretKey, String whTimestamp, String whId, String whSignature, String requestBody, long expires) throws Exception {
-        long whTime = Long.parseLong(whTimestamp);
+    public static boolean verifyMessage(String whSecret, String whId, Long whTimestamp, String whSignature, String requestBody) throws Exception {
         long currentTime = System.currentTimeMillis();
-        if (currentTime - whTime * 1000 > expires) { // 5 phút = 300000 ms
+        if (currentTime - whTimestamp * 1000 > EXPIRES_IN_MS) {
             return false;
         }
 
         String dataToSign = whId + "." + whTimestamp + "." + requestBody;
 
         Mac mac = Mac.getInstance(HMAC_SHA256_ALGORITHM);
-        byte[] decodedSecret = Base64.getDecoder().decode(secretKey.substring(6)); //Bỏ whsec_
+        byte[] decodedSecret = Base64.getDecoder().decode(whSecret.substring(6)); //Bỏ whsec_
         SecretKeySpec secretKeySpec = new SecretKeySpec(decodedSecret, HMAC_SHA256_ALGORITHM);
         mac.init(secretKeySpec);
         byte[] computedHmac = mac.doFinal(dataToSign.getBytes(StandardCharsets.UTF_8));

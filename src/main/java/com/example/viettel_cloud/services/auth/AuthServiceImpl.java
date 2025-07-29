@@ -1,14 +1,15 @@
 package com.example.viettel_cloud.services.auth;
 
-import com.example.viettel_cloud.dto.StateAndCodeVerifier;
+import com.example.viettel_cloud.dto.request.auth.StateAndCodeVerifier;
 import com.example.viettel_cloud.dto.request.auth.ExchangeTokenReq;
-import com.example.viettel_cloud.dto.request.auth.LoginWithGidcReq;
-import com.example.viettel_cloud.dto.response.ExchangeTokenRes;
+import com.example.viettel_cloud.dto.request.auth.LoginWithOidcReq;
+import com.example.viettel_cloud.dto.response.auth.ExchangeTokenRes;
 import com.example.viettel_cloud.dto.response.auth.IAMLoginLinkRes;
 import com.example.viettel_cloud.dto.response.auth.IamUserIdentity;
 import com.example.viettel_cloud.dto.response.auth.LoginRes;
 import com.example.viettel_cloud.entities.User;
-import com.example.viettel_cloud.other_service.viettel_cloud_iam.ViettelCloudIAMService;
+import com.example.viettel_cloud.other_service.viettel_cloud.iam.ViettelCloudIAMService;
+import com.example.viettel_cloud.repositories.user.UserRepository;
 import com.example.viettel_cloud.security.JwtTokenProvider;
 import com.example.viettel_cloud.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private ViettelCloudIAMService viettelCloudIAMService;
+    @Autowired
+    private UserRepository userRepository;
 
     @Value("${viettel-cloud.iam.client-id}")
     private String clientId;
@@ -58,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
         return new IAMLoginLinkRes(link, tokenVerifier);
     }
 
-    public LoginRes loginWithOIDC(LoginWithGidcReq request) {
+    public LoginRes loginWithOIDC(LoginWithOidcReq request) {
         if (request.getError() != null) {
             throw new RuntimeException("403 FORBIDDEN");
         }
@@ -83,17 +86,33 @@ public class AuthServiceImpl implements AuthService {
         //todo: Hiện tại chưa verify id_token
         IamUserIdentity iamUserIdentity = Util.stringToObject(IamUserIdentity.class, jwtTokenProvider.getPayload(exchangeTokenResponse.getIdToken()));
 
-        //todo: Nếu đăng nhập lần đầu => Tạo user mới trong DB liên kết đến identity
-        //todo: Nếu đã có tài khoản => Truy vấn thông tin, gen token của hệ thống và trả về response
+        User user = userRepository.getUserByIssAndSub(iamUserIdentity.getIss(), iamUserIdentity.getSub());
 
-        return new LoginRes();
+        //Nếu đăng nhập lần đầu => Tạo user mới trong DB liên kết đến identity
+        if (user == null) {
+            user = createUser(iamUserIdentity);
+        }
+
+        LoginRes response = getLoginRes(user);
+        response.setToken(jwtTokenProvider.genTokenHS512(String.valueOf(user.getId()), secretKey, jwtAdminExpirationInMs));
+        return response;
     }
 
     private User createUser(IamUserIdentity iamUserIdentity) {
-        return null;
+        User user = new User();
+        user.setEmail(iamUserIdentity.getEmail());
+        user.setName(iamUserIdentity.getName());
+        user.setIss(iamUserIdentity.getIss());
+        user.setSub(iamUserIdentity.getSub());
+        //todo: Thông tin khác nếu có
+
+        return userRepository.save(user);
     }
 
-    private User getUser(String sub, String iss) {
-        return null;
+    private LoginRes getLoginRes(User user) {
+        LoginRes loginResponse = new LoginRes();
+        loginResponse.setUser(user);
+
+        return loginResponse;
     }
 }

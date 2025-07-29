@@ -1,4 +1,4 @@
-package com.example.viettel_cloud.dto.response;
+package com.example.viettel_cloud.dto.response.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

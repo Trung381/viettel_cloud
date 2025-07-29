@@ -1,6 +1,6 @@
-package com.example.viettel_cloud.controller.auth;
+package com.example.viettel_cloud.controller;
 
-import com.example.viettel_cloud.dto.request.auth.LoginWithGidcReq;
+import com.example.viettel_cloud.dto.request.auth.LoginWithOidcReq;
 import com.example.viettel_cloud.services.auth.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class AuthController {
     }
 
     @PostMapping("v1/auth/oidc-login")
-    public ResponseEntity<?> loginWithOIDC(@RequestBody @Valid LoginWithGidcReq request) {
+    public ResponseEntity<?> loginWithOIDC(@RequestBody @Valid LoginWithOidcReq request) {
         return ResponseEntity.ok(authService.loginWithOIDC(request));
     }
 }

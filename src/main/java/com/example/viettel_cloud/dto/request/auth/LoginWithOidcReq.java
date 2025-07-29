@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginWithGidcReq {
+public class LoginWithOidcReq {
     @NotBlank
     private String state;
 

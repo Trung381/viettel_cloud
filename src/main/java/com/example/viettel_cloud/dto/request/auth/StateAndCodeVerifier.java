@@ -1,4 +1,4 @@
-package com.example.viettel_cloud.dto;
+package com.example.viettel_cloud.dto.request.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
